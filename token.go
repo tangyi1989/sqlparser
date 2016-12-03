@@ -99,6 +99,7 @@ var keywords = map[string]int{
 	"union":         UNION,
 	"unique":        UNIQUE,
 	"update":        UPDATE,
+	"replace":       REPLACE,
 	"use":           USE,
 	"using":         USING,
 	"values":        VALUES,

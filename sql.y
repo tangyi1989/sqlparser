@@ -65,7 +65,7 @@ var (
 }
 
 %token LEX_ERROR
-%token <empty> SELECT INSERT UPDATE DELETE FROM WHERE GROUP HAVING ORDER BY LIMIT FOR
+%token <empty> SELECT INSERT UPDATE DELETE REPLACE FROM WHERE GROUP HAVING ORDER BY LIMIT FOR
 %token <empty> ALL DISTINCT AS EXISTS IN IS LIKE BETWEEN NULL ASC DESC VALUES INTO DUPLICATE KEY DEFAULT SET LOCK KEYRANGE
 %token <bytes> ID STRING NUMBER VALUE_ARG LIST_ARG COMMENT
 %token <empty> LE GE NE NULL_SAFE_EQUAL
@@ -95,7 +95,7 @@ var (
 
 %type <statement> command
 %type <selStmt> select_statement
-%type <statement> insert_statement update_statement delete_statement set_statement
+%type <statement> insert_statement update_statement replace_statement delete_statement set_statement
 %type <statement> create_statement alter_statement rename_statement drop_statement
 %type <statement> analyze_statement other_statement
 %type <bytes2> comment_opt comment_list
@@ -159,6 +159,7 @@ command:
   }
 | insert_statement
 | update_statement
+| replace_statement
 | delete_statement
 | set_statement
 | create_statement
@@ -198,6 +199,12 @@ update_statement:
   UPDATE comment_opt dml_table_expression SET update_list where_expression_opt order_by_opt limit_opt
   {
     $$ = &Update{Comments: Comments($2), Table: $3, Exprs: $5, Where: NewWhere(AST_WHERE, $6), OrderBy: $7, Limit: $8}
+  }
+
+replace_statement:
+  REPLACE comment_opt dml_table_expression SET update_list
+  {
+    $$ = &Replace{Comments: Comments($2), Table: $3, Exprs: $5}
   }
 
 delete_statement:
@@ -978,7 +985,7 @@ update_list:
 update_expression:
   column_name '=' value_expression
   {
-    $$ = &UpdateExpr{Name: $1, Expr: $3} 
+    $$ = &UpdateExpr{Name: $1, Expr: $3}
   }
 
 exists_opt:
