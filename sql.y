@@ -184,6 +184,10 @@ insert_statement:
   {
     $$ = &Insert{Comments: Comments($2), Table: $4, Columns: $5, Rows: $6, OnDup: OnDup($7)}
   }
+| INSERT comment_opt dml_table_expression column_list_opt row_list on_dup_opt
+  {
+    $$ = &Insert{Comments: Comments($2), Table: $3, Columns: $4, Rows: $5, OnDup: OnDup($6)}
+  }
 | INSERT comment_opt INTO dml_table_expression SET update_list on_dup_opt
   {
     cols := make(Columns, 0, len($6))
@@ -204,7 +208,6 @@ insert_statement:
     }
     $$ = &Insert{Comments: Comments($2), Table: $3, Columns: cols, Rows: Values{vals}, OnDup: OnDup($6)}
   }
-
 
 update_statement:
   UPDATE comment_opt dml_table_expression SET update_list where_expression_opt order_by_opt limit_opt
